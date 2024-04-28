@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mal3t53.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -25,13 +25,28 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const database = client.db('touristDB');
-    const spotCollections = database.collection('spotCollections');
+    const spotCollections = client.db('touristDB').collection('spotCollections');
 
     // Add Spot data via user form
     app.post('/add_spot', async (req, res) => {
       const spots = req.body;
       const result = await spotCollections.insertOne(spots);
+      res.send(result);
+    });
+
+    // Load Spot data
+    app.get('/', async (req, res) => {
+      const cursor = spotCollections.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Load single data
+
+    app.get('/details/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await spotCollections.findOne(query);
       res.send(result);
     });
 
@@ -44,11 +59,6 @@ async function run() {
   }
 }
 run().catch(console.log);
-
-// Server Request and responses
-app.get('/', (req, res) => {
-  res.send('Server is running');
-});
 
 app.listen(port, () => {
   console.log(`Server is running on port : ${port}`);
