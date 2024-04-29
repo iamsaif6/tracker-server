@@ -42,11 +42,19 @@ async function run() {
     });
 
     // Load single data
-
     app.get('/details/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await spotCollections.findOne(query);
+      res.send(result);
+    });
+
+    // Load data match with email
+    app.get('/mylist/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { email: id };
+      const result = await spotCollections.find(query).toArray();
+      console.log(result);
       res.send(result);
     });
 
