@@ -41,6 +41,14 @@ async function run() {
       res.send(result);
     });
 
+    // Delete Single Data
+    app.delete('/my_list/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await spotCollections.deleteOne(query);
+      res.send(result);
+    });
+
     // Load single data
     app.get('/details/:id', async (req, res) => {
       const id = req.params.id;
