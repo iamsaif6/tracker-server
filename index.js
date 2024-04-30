@@ -5,7 +5,12 @@ require('dotenv').config();
 const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+const corsConfig = {
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+};
+app.use(cors(corsConfig));
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -23,7 +28,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const spotCollections = client.db('touristDB').collection('spotCollections');
     const countryCollection = client.db('touristDB').collection('countryDB');
