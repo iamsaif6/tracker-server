@@ -26,6 +26,7 @@ async function run() {
     await client.connect();
 
     const spotCollections = client.db('touristDB').collection('spotCollections');
+    const countryCollection = client.db('touristDB').collection('countryDB');
 
     // Add Spot data via user form
     app.post('/add_spot', async (req, res) => {
@@ -37,6 +38,22 @@ async function run() {
     // Load Spot data
     app.get('/', async (req, res) => {
       const cursor = spotCollections.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    //Load country data
+    app.get('/country', async (req, res) => {
+      const cursor = countryCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Load specific country data
+    app.get('/country/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { country_Name: id };
+      const cursor = spotCollections.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -57,12 +74,35 @@ async function run() {
       res.send(result);
     });
 
+    // Update single data
+    app.put('/update/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedSpot = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          tourists_spot_name: updatedSpot.tourists_spot_name,
+          location: updatedSpot.location,
+          seasonality: updatedSpot.seasonality,
+          totaVisitorsPerYear: updatedSpot.totaVisitorsPerYear,
+          country_Name: updatedSpot.country_Name,
+          average_cost: updatedSpot.average_cost,
+          travel_time: updatedSpot.travel_time,
+          image: updatedSpot.image,
+          description: updatedSpot.description,
+        },
+      };
+
+      const result = await spotCollections.updateOne(filter, updatedDoc, options);
+      res.send(result);
+    });
+
     // Load data match with email
     app.get('/mylist/:id', async (req, res) => {
       const id = req.params.id;
       const query = { email: id };
       const result = await spotCollections.find(query).toArray();
-      console.log(result);
       res.send(result);
     });
 
